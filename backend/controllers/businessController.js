@@ -1,4 +1,5 @@
 const Business = require("../models/Business");
+const User = require("../models/User");
 const { generateQR } = require("../services/qrService");
 
 

@@ -7,5 +7,5 @@ export const generateReviews = async (stars, businessId) => {
     { stars, businessId }
   );
 
-  return res.data.reviews;
+  return res.data;
 };

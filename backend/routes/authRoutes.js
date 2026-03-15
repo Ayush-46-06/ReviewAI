@@ -8,7 +8,7 @@ const {
   register,
   login,
   GetUserProfile,
-  VerifyPayment,
+  verifyPayment,
   createOrder
 } = require("../controllers/authController");
 
@@ -16,7 +16,7 @@ router.post("/register", register);
 router.post("/login", login);
 router.get("/profile", authMiddleware, GetUserProfile);
 router.post("/create-order", authMiddleware, createOrder);
-router.post("/verify-payment", authMiddleware, VerifyPayment);
+router.post("/verify-payment", authMiddleware, verifyPayment);
 
 
 

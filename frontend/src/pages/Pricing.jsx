@@ -39,7 +39,7 @@ export default function PricingPage() {
     const initiateRazorpay = (orderId, amount, currency) => {
 
         const options = {
-            key: import.meta.env.RAZORPAY_KEY_ID, // from Razorpay dashboard
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID, // from Razorpay dashboard
             amount: amount,
             currency: currency,
             name: "Revica AI",

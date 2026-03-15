@@ -35,7 +35,7 @@ const generateReviews = async (req, res) => {
   if (user.plan === "pro") {
 
     const startOfDay = new Date();
-    startOfDay.setHours(0,0,0,0);
+    startOfDay.setHours(0, 0, 0, 0);
 
     usage = await Usage.findOne({
       userId: user._id,
