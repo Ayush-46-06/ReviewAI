@@ -5,61 +5,32 @@ const groq = new Groq({
 });
 
 exports.generateAIReviews = async (stars, business) => {
-
   const { businessName, category, city, services } = business;
 
+  // Concise prompt – saves ~30–50% input tokens
   const prompt = `
-You are writing Google reviews from the perspective of real customers.
-
-Business Name: ${businessName}
-Category: ${category}
-City: ${city}
+Generate 4 realistic Google reviews (50-80 words each) for:
+Business: ${businessName} (${category}, ${city})
 Services: ${services?.join(", ")}
-
-Customer Rating: ${stars} stars
-
-Write exactly 5 Google reviews.
-
+Rating: ${stars} stars
 Rules:
-- Each review must be 50–80 words
-- Write naturally like a real customer
-- Mention services if relevant
-- Do NOT explain anything
-- Do NOT include reasoning
-- Do NOT number the reviews
-- Output ONLY the reviews
-- Separate reviews with a blank line
+- Write naturally, mention specific services
+- Output ONLY the reviews, each separated by a blank line
 `;
 
   const response = await groq.chat.completions.create({
-    model: "groq/compound", // 🔹 CHANGED: using Groq Compound model instead of qwen/qwen3-32b
-
+    model: "groq/compound",  // confirm this model is correct; consider "llama2-70b-4096" if allowed
     messages: [
-      {
-        role: "system",
-        content: "You generate realistic Google reviews."
-      },
-      {
-        role: "user",
-        content: prompt
-      }
+      { role: "system", content: "You write realistic Google reviews." },
+      { role: "user", content: prompt }
     ],
-
-    temperature: 0.6,
-    max_completion_tokens: 800, // 🔹 same parameter works for compound models
-
-    compound_custom: { // 🔹 ADDED: enables compound model tools
-      tools: {
-        enabled_tools: [
-          "web_search",
-          "code_interpreter",
-          "visit_website"
-        ]
-      }
-    }
+    temperature: 0.5,
+    max_completion_tokens: 500,  // reduced for 4 reviews
+    // Remove compound_custom if not required – it may not affect token count but can be omitted
   });
 
-  const text = response.choices[0].message.content;
+  const text = response.choices[0]?.message?.content;
+  if (!text) return [];
 
   return text
     .split("\n\n")

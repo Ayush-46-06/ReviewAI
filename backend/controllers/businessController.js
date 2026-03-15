@@ -2,23 +2,32 @@ const Business = require("../models/Business");
 const { generateQR } = require("../services/qrService");
 
 exports.createBusiness = async (req, res) => {
+  try {
 
-  const business = new Business({
-    ...req.body,
-    owner: req.user.id
-  });
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
 
-  const reviewLink =
-  `http://localhost:5173/r/${business._id}`;
+    const business = new Business({
+      ...req.body,
+      owner: req.user.id
+    });
 
-  const qr = await generateQR(reviewLink);
+    const reviewLink = `http://localhost:5173/review/${business._id}`;
 
-  business.reviewLink = reviewLink;
-  business.qrCode = qr;
+    const qr = await generateQR(reviewLink);
 
-  await business.save();
+    business.reviewLink = reviewLink;
+    business.qrCode = qr;
 
-  res.json(business);
+    await business.save();
+
+    res.status(201).json(business);
+
+  } catch (error) {
+    console.error("Create Business Error:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
 };
 
 exports.getBusinessById = async (req, res) => {

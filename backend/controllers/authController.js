@@ -41,30 +41,30 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-
   try {
 
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(400).json({
-        message: "User not found"
-      });
+      return res.status(400).json({ message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid credentials"
-      });
+      return res.status(400).json({ message: "Invalid password" });
     }
 
+    // ✅ Generate Token
     const token = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "secretkey",
       { expiresIn: "7d" }
     );
 
@@ -75,11 +75,36 @@ exports.login = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
-    res.status(500).json({
-      error: error.message
+
+exports.GetUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user
     });
 
-  }
+  } catch (error) {
+    console.error("GetUserProfile Error:", error);
 
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
 };

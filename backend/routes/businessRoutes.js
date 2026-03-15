@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const businessController = require("../controllers/businessController");
-const authMiddleware = require("../middleware/authMiddleware");
+const { authMiddleware } = require("../middleware/authMiddleware");
 
 // Protected route to create business
 router.post("/", authMiddleware, businessController.createBusiness);

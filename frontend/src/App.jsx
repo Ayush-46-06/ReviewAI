@@ -7,6 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import BusinessForm from "./pages/BusinessForm";
 import ReviewPage from "./pages/ReviewPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RevicaAILandingPage from "./Home";
+import AuthSuccess from "./pages/AuthSuccess";
 
 function App() {
   return (
@@ -15,9 +17,10 @@ function App() {
       <Routes>
 
         {/* Company authentication */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<RevicaAILandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/auth/success" element={<AuthSuccess />} />
 
         {/* Company dashboard */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -26,7 +29,7 @@ function App() {
         <Route path="/add-business" element={<ProtectedRoute><BusinessForm /></ProtectedRoute>} />
 
         {/* Public review generator */}
-        <Route path="/r/:id" element={<ReviewPage />} />
+        <Route path="/review/:id" element={<ReviewPage />} />
 
       </Routes>
 
