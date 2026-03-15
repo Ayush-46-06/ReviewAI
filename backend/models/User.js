@@ -6,6 +6,13 @@ const userSchema = new mongoose.Schema({
   password: String,
   companyName: String,
   googleId: String,
+
+  plan: {
+    type: String,
+    default: "free"
+  },
+
+  subscriptionExpires: Date
 });
 
 module.exports = mongoose.model("User", userSchema);

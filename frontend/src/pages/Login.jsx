@@ -39,7 +39,7 @@ export default function Login() {
   // Placeholder for Google login – replace with actual logic
   const handleGoogleLogin = () => {
     // Example: redirect to your backend OAuth endpoint
-    window.location.href = "http://localhost:5000/api/auth/google";    // Or call a function from authApi, e.g. loginWithGoogle()
+    window.location.href = "/api/auth/google";    // Or call a function from authApi, e.g. loginWithGoogle()
   };
 
   return (
@@ -137,16 +137,6 @@ export default function Login() {
                   )}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs sm:text-sm">
-              <label className="flex items-center gap-2 text-slate-400 cursor-pointer group">
-                <input type="checkbox" className="w-4 h-4 rounded border-white/10 bg-white/5 text-teal-500 focus:ring-teal-500/20 focus:ring-offset-0 transition-all cursor-pointer" />
-                <span className="group-hover:text-slate-200 transition-colors">Remember me</span>
-              </label>
-              <a href="/forgot-password" className="text-teal-400 font-medium hover:text-teal-300 transition-colors">
-                Forgot password?
-              </a>
             </div>
 
             <button

@@ -30,7 +30,7 @@ export default function Register() {
   };
 
   const handleGoogleSignUp = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";    // Or call a function from authApi, e.g. loginWithGoogle()
+    window.location.href = "/api/auth/google";    // Or call a function from authApi, e.g. loginWithGoogle()
     // Implement your Google OAuth flow here
   };
 

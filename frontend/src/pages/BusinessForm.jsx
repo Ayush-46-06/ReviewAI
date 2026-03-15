@@ -133,7 +133,7 @@ export default function AddBusiness() {
               </div>
             ) : (
               // Form
-              <div className="flex flex-col ">
+              <div className="flex flex-col gap-3">
                 {/* Business Name */}
                 <div className="group relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-teal-400 transition-colors duration-300">

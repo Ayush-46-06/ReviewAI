@@ -59,7 +59,6 @@ export default function Dashboard() {
         
       } catch (err) {
         console.error("Failed to fetch data:", err);
-        // If token is invalid, clear it and redirect
         localStorage.removeItem("token");
         navigate("/login");
       } finally {

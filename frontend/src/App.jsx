@@ -9,6 +9,7 @@ import ReviewPage from "./pages/ReviewPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RevicaAILandingPage from "./Home";
 import AuthSuccess from "./pages/AuthSuccess";
+import PricingPage from "./pages/Pricing";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/auth/success" element={<AuthSuccess />} />
+        <Route path="/pricing" element={<PricingPage />} />
 
         {/* Company dashboard */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const razorpay = require("../config/razorpay");
 
 exports.register = async (req, res) => {
 
@@ -106,5 +108,53 @@ exports.GetUserProfile = async (req, res) => {
       success: false,
       message: "Server error"
     });
+  }
+};
+
+
+exports.Payments = async (req, res) => {
+  try {
+    const options = {
+      amount: 99 * 100, // ₹99
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`
+    };
+    const order = await razorpay.orders.create(options);
+    res.json({
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Order creation failed" });
+  }
+};
+
+exports.VerifyPayment = async (req, res) => {
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+    userId
+  } = req.body;
+
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(body)
+    .digest("hex");
+
+  if (expectedSignature === razorpay_signature) {
+
+    await User.findByIdAndUpdate(userId, {
+      plan: "pro"
+    });
+
+    res.json({ success: true });
+
+  } else {
+    res.status(400).json({ success: false });
   }
 };

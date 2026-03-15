@@ -9,7 +9,7 @@ exports.generateAIReviews = async (stars, business) => {
 
   // Concise prompt – saves ~30–50% input tokens
   const prompt = `
-Generate 4 realistic Google reviews (50-80 words each) for:
+Generate 3 realistic Google reviews (40-60 words each) for:
 Business: ${businessName} (${category}, ${city})
 Services: ${services?.join(", ")}
 Rating: ${stars} stars
@@ -25,7 +25,7 @@ Rules:
       { role: "user", content: prompt }
     ],
     temperature: 0.5,
-    max_completion_tokens: 500,  // reduced for 4 reviews
+    max_completion_tokens: 500,  // reduced for 3 reviews
     // Remove compound_custom if not required – it may not affect token count but can be omitted
   });
 

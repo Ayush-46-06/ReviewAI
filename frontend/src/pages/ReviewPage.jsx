@@ -13,10 +13,10 @@ export default function ReviewPage() {
   const [stars, setStars] = useState(0);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const isGenerateDisabled = !stars || loading || reviews.length > 0;
   useEffect(() => {
     const fetchBusiness = async () => {
-      const res = await axios.get(`http://localhost:5000/api/business/${id}`);
+      const res = await axios.get(`/api/business/${id}`);
       setBusiness(res.data);
     };
     fetchBusiness();
@@ -129,7 +129,8 @@ export default function ReviewPage() {
               </div>
               <StarRating stars={stars} setStars={setStars} />
             </div>
-                        <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+            {/* Step 2: Generate your review */}
+            <div className="bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm">
                   2
@@ -139,27 +140,32 @@ export default function ReviewPage() {
                 </h3>
               </div>
 
-              <button
-                onClick={handleGenerate}
-                disabled={!stars || loading}
-                className={`w-full py-4 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 flex items-center justify-center gap-2
-                  ${
-                    !stars || loading
-                      ? "bg-white/5 text-slate-500 cursor-not-allowed border border-white/10"
-                      : "bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 active:scale-[0.98] shadow-lg shadow-teal-500/20"
-                  }`}
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Generating…
-                  </>
-                ) : (
-                  <>
-                    <span>✦ Generate Review</span>
-                  </>
-                )}
-              </button>
+              {/* Determine if button should be disabled */}
+              {(() => {
+                const isGenerateDisabled = !stars || loading || reviews.length > 0;
+                return (
+                  <button
+                    onClick={handleGenerate}
+                    disabled={isGenerateDisabled}
+                    className={`w-full py-4 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200 flex items-center justify-center gap-2
+          ${isGenerateDisabled
+                        ? "bg-white/5 text-slate-500 cursor-not-allowed border border-white/10"
+                        : "bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 active:scale-[0.98] shadow-lg shadow-teal-500/20"
+                      }`}
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Generating…
+                      </>
+                    ) : (
+                      <>
+                        <span>✦ Generate Review</span>
+                      </>
+                    )}
+                  </button>
+                );
+              })()}
 
               {!stars && (
                 <p className="text-xs text-slate-500 text-center mt-3">
