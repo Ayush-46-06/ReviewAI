@@ -2,9 +2,9 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const razorpay = require("../config/razorpay");
+const Razorpay = require("razorpay");
 
-exports.register = async (req, res) => {
+const register = async (req, res) => {
 
   try {
 
@@ -42,7 +42,7 @@ exports.register = async (req, res) => {
 
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
   try {
 
     const { email, password } = req.body;
@@ -83,7 +83,7 @@ exports.login = async (req, res) => {
 };
 
 
-exports.GetUserProfile = async (req, res) => {
+ const GetUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -112,49 +112,63 @@ exports.GetUserProfile = async (req, res) => {
 };
 
 
-exports.Payments = async (req, res) => {
-  try {
-    const options = {
-      amount: 99 * 100, // ₹99
-      currency: "INR",
-      receipt: `receipt_${Date.now()}`
-    };
-    const order = await razorpay.orders.create(options);
-    res.json({
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Order creation failed" });
-  }
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+ const createOrder = async (req, res) => {
+
+  const options = {
+    amount: 9900, // ₹99 in paise
+    currency: "INR",
+    receipt: "revica_pro_plan"
+  };
+
+  const order = await razorpay.orders.create(options);
+
+  res.json({
+    orderId: order.id,
+    amount: order.amount,
+    currency: order.currency
+  });
+
 };
 
-exports.VerifyPayment = async (req, res) => {
-  const {
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature,
-    userId
-  } = req.body;
+const verifyPayment = async (req, res) => {
 
-  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-  const expectedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-    .update(body)
+  const generated_signature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_SECRET)
+    .update(razorpay_order_id + "|" + razorpay_payment_id)
     .digest("hex");
 
-  if (expectedSignature === razorpay_signature) {
+  if (generated_signature === razorpay_signature) {
 
-    await User.findByIdAndUpdate(userId, {
-      plan: "pro"
-    });
+    // update user plan to PRO
+    const user = await User.findById(req.user.id);
+
+    user.plan = "pro";
+
+    user.planExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+    await user.save();
 
     res.json({ success: true });
 
   } else {
+
     res.status(400).json({ success: false });
+
   }
+
+};
+
+module.exports = {
+  register,
+  login,
+  GetUserProfile,
+  createOrder,
+  verifyPayment
 };

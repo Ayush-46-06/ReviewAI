@@ -7,12 +7,16 @@ const { authMiddleware } = require("../middleware/authMiddleware");
 const {
   register,
   login,
-  GetUserProfile
+  GetUserProfile,
+  VerifyPayment,
+  createOrder
 } = require("../controllers/authController");
 
 router.post("/register", register);
 router.post("/login", login);
 router.get("/profile", authMiddleware, GetUserProfile);
+router.post("/create-order", authMiddleware, createOrder);
+router.post("/verify-payment", authMiddleware, VerifyPayment);
 
 
 
