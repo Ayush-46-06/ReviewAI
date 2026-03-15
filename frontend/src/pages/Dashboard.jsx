@@ -1,14 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getUserBusinesses } from "../api/businessApi";
-import { getUserprofile } from "../api/businessApi"; // Import profile API
+import { getUserBusinesses, getUserprofile, updateBusiness } from "../api/businessApi";
 import html2canvas from "html2canvas";
 import QRPoster from "../components/QRPoster";
 
 export default function Dashboard() {
   const [businesses, setBusinesses] = useState([]);
-  const [user, setUser] = useState(null);               // New state for user
-  const [loading, setLoading] = useState(true);         // Combined loading state
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -17,7 +16,19 @@ export default function Dashboard() {
   const qrRefs = useRef({});
   const navigate = useNavigate();
 
-  // Close sidebar when clicking outside on mobile
+  // Edit modal states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editBusiness, setEditBusiness] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    category: "",
+    city: "",
+    services: "",
+    language: "",
+    tone: "",
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Close sidebar on outside click (mobile)
   useEffect(() => {
     function handleClickOutside(event) {
       if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -28,7 +39,7 @@ export default function Dashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [sidebarOpen]);
 
-  // Close profile dropdown when clicking outside
+  // Close profile dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
@@ -49,14 +60,12 @@ export default function Dashboard() {
 
     const fetchData = async () => {
       try {
-        // Fetch both in parallel
         const [profileRes, businessesRes] = await Promise.all([
           getUserprofile(token),
           getUserBusinesses(token)
         ]);
         setUser(profileRes.data.data);
         setBusinesses(businessesRes.data);
-        
       } catch (err) {
         console.error("Failed to fetch data:", err);
         localStorage.removeItem("token");
@@ -68,6 +77,60 @@ export default function Dashboard() {
 
     fetchData();
   }, [navigate]);
+
+  // Open edit modal and prefill form data
+  const handleOpenEdit = (business) => {
+    setEditBusiness(business);
+    setEditFormData({
+      category: business.category || "",
+      city: business.city || "",
+      services: business.services ? business.services.join(", ") : "",
+      language: business.language ? business.language.join(", ") : "",
+      tone: business.tone || "",
+    });
+    setShowEditModal(true);
+  };
+
+  const handleCloseEdit = () => {
+    setShowEditModal(false);
+    setEditBusiness(null);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editBusiness) return;
+
+    setIsUpdating(true);
+    const token = localStorage.getItem("token");
+    try {
+      // Convert comma‑separated strings to arrays
+      const updatedData = {
+        category: editFormData.category,
+        city: editFormData.city,
+        services: editFormData.services.split(",").map(s => s.trim()).filter(Boolean),
+        language: editFormData.language.split(",").map(l => l.trim()).filter(Boolean),
+        tone: editFormData.tone,
+      };
+
+      await updateBusiness(token, editBusiness._id, updatedData);
+
+      // Refresh businesses list
+      const businessesRes = await getUserBusinesses(token);
+      setBusinesses(businessesRes.data);
+
+      handleCloseEdit();
+    } catch (error) {
+      console.error("Failed to update business", error);
+      alert("Update failed. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -102,11 +165,10 @@ export default function Dashboard() {
     }
   };
 
-  // Helper to get user initials
-const getUserInitials = () => {
-  if (!user.name) return "U";
-  return user.name.trim().charAt(0).toUpperCase();
-};
+  const getUserInitials = () => {
+    if (!user?.name) return "U";
+    return user.name.trim().charAt(0).toUpperCase();
+  };
 
   if (loading) {
     return (
@@ -136,7 +198,7 @@ const getUserInitials = () => {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar – unchanged */}
       <aside
         ref={sidebarRef}
         className={`
@@ -146,7 +208,6 @@ const getUserInitials = () => {
         `}
       >
         <div className="flex flex-col h-full p-6">
-          {/* Logo */}
           <div className="mb-8">
             <span className="text-2xl font-bold tracking-tighter italic bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
               Revica AI
@@ -154,15 +215,12 @@ const getUserInitials = () => {
             <span className="block text-xs text-slate-500 font-medium mt-1">ATHENURA</span>
           </div>
 
-          {/* Navigation Links */}
           <nav className="flex-1 space-y-1">
             <NavLink to="/dashboard" icon="dashboard" active>Dashboard</NavLink>
             <NavLink to="/add-business" icon="add">Add Business</NavLink>
             <NavLink to="/pricing" icon="pricing">Pricing</NavLink>
-            <NavLink to="/settings" icon="settings">Settings</NavLink>
           </nav>
 
-          {/* Bottom links */}
           <div className="pt-6 mt-auto border-t border-white/5 space-y-1">
             <NavLink to="/faq" icon="faq">FAQ</NavLink>
             <NavLink to="/contact" icon="contact">Contact Us</NavLink>
@@ -172,10 +230,9 @@ const getUserInitials = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen relative z-10">
-        {/* Top Navbar */}
+        {/* Top Navbar – unchanged */}
         <header className="bg-white/[0.02] backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 py-4 z-20">
           <div className="flex items-center justify-between">
-            {/* Left side: hamburger + page title */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -188,7 +245,6 @@ const getUserInitials = () => {
               <h1 className="text-xl font-bold text-white tracking-tight">Dashboard</h1>
             </div>
 
-            {/* Right side: profile icon with user data */}
             <div className="relative" ref={profileDropdownRef}>
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -205,16 +261,12 @@ const getUserInitials = () => {
                 </svg>
               </button>
 
-              {/* Profile Dropdown */}
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white/[0.05] backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-2 z-50 z-[999]">
+                <div className="absolute right-0 mt-2 w-48 bg-white/[0.05] backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-2 z-50">
                   <div className="px-4 py-2 border-b border-white/10 mb-1">
                     <p className="text-sm font-medium text-white">{user.name}</p>
                     <p className="text-xs text-slate-400">{user.email}</p>
                   </div>
-                  <Link to="/settings" className="block px-4 py-2 text-sm text-slate-200 hover:bg-white/10" onClick={() => setProfileDropdownOpen(false)}>
-                    Settings
-                  </Link>
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-white/10"
@@ -229,7 +281,7 @@ const getUserInitials = () => {
 
         {/* Main Content Area */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
-          {/* Stats Cards */}
+          {/* Stats Cards – unchanged */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
             <div className="bg-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-teal-500/50 transition group">
               <div className="flex items-center gap-4">
@@ -254,7 +306,7 @@ const getUserInitials = () => {
                 </div>
                 <div>
                   <p className="text-sm text-slate-400">Current Plan</p>
-                  <p className="text-3xl font-bold text-white">Free Plan</p>
+                  <p className="text-3xl font-bold text-white">{user.plan?.charAt(0).toUpperCase() + user.plan?.slice(1) || "Free"}</p>
                 </div>
               </div>
               <Link to="/pricing" className="mt-4 inline-block text-sm text-teal-400 hover:underline">
@@ -291,7 +343,18 @@ const getUserInitials = () => {
                       <QRPoster ref={(el) => (qrRefs.current[business._id] = el)} business={business} />
                     </div>
 
-                    <div className="flex justify-between items-start mb-4">
+                    {/* Edit Button (Pencil) */}
+                    <button
+                      onClick={() => handleOpenEdit(business)}
+                      className="absolute top-4 right-4 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-teal-400 transition"
+                      title="Edit business details"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+
+                    <div className="flex justify-between items-start mb-4 pr-8"> {/* Added padding to avoid overlap with edit button */}
                       <div>
                         <h3 className="text-lg font-bold text-white line-clamp-1">{business.businessName}</h3>
                         <p className="text-sm text-slate-400 flex items-center mt-1">
@@ -309,10 +372,10 @@ const getUserInitials = () => {
                       )}
                     </div>
 
-                    {business.services && (
+                    {business.services && business.services.length > 0 && (
                       <div className="mb-4">
                         <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2">Services</p>
-                        <p className="text-sm text-slate-300 line-clamp-2">{business.services}</p>
+                        <p className="text-sm text-slate-300 line-clamp-2">{business.services.join(", ")}</p>
                       </div>
                     )}
 
@@ -358,11 +421,126 @@ const getUserInitials = () => {
           </div>
         </main>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0a0a0f] border border-white/10 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-white">Edit Business Details</h3>
+              <button onClick={handleCloseEdit} className="text-slate-400 hover:text-white transition">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit} className="space-y-5">
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Category</label>
+                <input
+                  type="text"
+                  name="category"
+                  value={editFormData.category}
+                  onChange={handleEditChange}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  placeholder="e.g., Restaurant, Salon"
+                />
+              </div>
+
+              {/* City */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">City</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={editFormData.city}
+                  onChange={handleEditChange}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  placeholder="City name"
+                />
+              </div>
+
+              {/* Services (comma separated) */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Services (comma separated)</label>
+                <input
+                  type="text"
+                  name="services"
+                  value={editFormData.services}
+                  onChange={handleEditChange}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  placeholder="e.g., Haircut, Styling, Coloring"
+                />
+              </div>
+
+              {/* Language (comma separated) */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Languages (comma separated)</label>
+                <input
+                  type="text"
+                  name="language"
+                  value={editFormData.language}
+                  onChange={handleEditChange}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  placeholder="e.g., English, Spanish, French"
+                />
+              </div>
+
+              {/* Tone */}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Tone</label>
+                <select
+                  name="tone"
+                  value={editFormData.tone}
+                  onChange={handleEditChange}
+                  className="w-full bg-black border border-white/10 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                >
+                  <option value="">Select tone</option>
+                  <option value="professional">Professional</option>
+                  <option value="friendly">Friendly</option>
+                  <option value="enthusiastic">Enthusiastic</option>
+                  <option value="formal">Formal</option>
+                  <option value="casual">Casual</option>
+                </select>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={handleCloseEdit}
+                  className="flex-1 px-4 py-2.5 border border-white/10 rounded-lg text-slate-300 hover:bg-white/5 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className={`flex-1 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white font-medium py-2.5 rounded-lg transition flex items-center justify-center gap-2 ${
+                    isUpdating ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {isUpdating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// Helper component for navigation links
+// Helper component for navigation links (unchanged)
 function NavLink({ to, icon, children, active = false }) {
   const icons = {
     dashboard: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />,

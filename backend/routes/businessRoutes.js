@@ -12,4 +12,6 @@ router.get("/user", authMiddleware, businessController.getUserBusinesses);
 // Public route to view business details
 router.get("/:id", businessController.getBusinessById);
 
+router.put("/:id", authMiddleware, businessController.updateBusiness);
+
 module.exports = router;

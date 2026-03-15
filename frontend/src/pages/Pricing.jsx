@@ -48,10 +48,9 @@ export default function PricingPage() {
 
             handler: function (response) {
 
-                console.log("Payment Successful", response);
-
                 alert("Payment Successful!");
 
+                window.location.href = "/dashboard";
                 axios.post(
                     "/api/auth/verify-payment",
                     response,

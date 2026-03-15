@@ -11,7 +11,9 @@ const businessSchema = new mongoose.Schema({
   city: String,
   googleReviewUrl: String,
   services: [String],
-
+  language: [String],
+  tone: String,
+  
   reviewLink: String,
   qrCode: String
 });

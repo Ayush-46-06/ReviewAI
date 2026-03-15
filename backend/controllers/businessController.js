@@ -76,3 +76,43 @@ exports.getUserBusinesses = async (req, res) => {
 };
 
 
+exports.updateBusiness = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id; // assuming auth middleware sets req.user
+
+    // Find the business and ensure it belongs to the user
+    const business = await Business.findOne({ _id: id, owner: userId });
+
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        message: "Business not found or you don't have permission to edit it",
+      });
+    }
+
+    // Fields allowed to update
+    const { category, city, services, language, tone } = req.body;
+
+    // Update only provided fields
+    if (category !== undefined) business.category = category;
+    if (city !== undefined) business.city = city;
+    if (services !== undefined) business.services = services;
+    if (language !== undefined) business.language = language;
+    if (tone !== undefined) business.tone = tone;
+
+    await business.save();
+
+    res.status(200).json({
+      success: true,
+      data: business,
+    });
+  } catch (error) {
+    console.error("Error updating business:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+

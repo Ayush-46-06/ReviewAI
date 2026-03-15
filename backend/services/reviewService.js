@@ -5,35 +5,48 @@ const groq = new Groq({
 });
 
 exports.generateAIReviews = async (stars, business) => {
-  const { businessName, category, city, services } = business;
+  const { businessName, category, city, services, language, tone } = business;
 
-  // Concise prompt – saves ~30–50% input tokens
   const prompt = `
-Generate 3 realistic Google reviews (40-60 words each) for:
-Business: ${businessName} (${category}, ${city})
+Write 3 natural Google reviews like human (40-60 words each).
+
+Business: ${businessName}
+Category: ${category}
+Location: ${city}
 Services: ${services?.join(", ")}
-Rating: ${stars} stars
+Language: ${language?.join(", ")}
+Tone: ${tone}
+Rating experience: ${stars} star customer experience.
 Rules:
-- Write naturally, mention specific services
-- Output ONLY the reviews, each separated by a blank line
+- Each review must be 40–60 words
+- Sound like a real customer
+- Mention a service if possible
+- Find company in on google and add details from google reviews (if available)
+- DO NOT write "Review 1", "1.", "5 stars", or any numbering
+- DO NOT add headings or bullet points
+- Separate each review with one blank line
 `;
 
-  const response = await groq.chat.completions.create({
-    model: "groq/compound",  // confirm this model is correct; consider "llama2-70b-4096" if allowed
-    messages: [
-      { role: "system", content: "You write realistic Google reviews." },
-      { role: "user", content: prompt }
-    ],
-    temperature: 0.5,
-    max_completion_tokens: 500,  // reduced for 3 reviews
-    // Remove compound_custom if not required – it may not affect token count but can be omitted
-  });
+  try {
+    const response = await groq.chat.completions.create({
+      model: "groq/compound", // best Groq model for text
+      messages: [
+        { role: "system", content: "You write realistic customer reviews." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.6,
+      max_tokens: 400
+    });
 
-  const text = response.choices[0]?.message?.content;
-  if (!text) return [];
+    const text = response.choices?.[0]?.message?.content || "";
 
-  return text
-    .split("\n\n")
-    .map(r => r.trim())
-    .filter(r => r.length > 40);
+    return text
+      .split("\n\n")
+      .map(r => r.trim())
+      .filter(r => r.split(" ").length >= 40); // ensures minimum words
+
+  } catch (error) {
+    console.error("Groq Error:", error.message);
+    return [];
+  }
 };

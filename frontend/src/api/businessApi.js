@@ -30,3 +30,10 @@ export const getUserprofile = (token) => {
     }
   });
 };
+
+export const updateBusiness = async (token, id, data) => {
+  const response = await axios.put(`/api/business/${id}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};

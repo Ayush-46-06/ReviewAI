@@ -1,5 +1,6 @@
 const Business = require("../models/Business");
 const Usage = require("../models/Usage");
+const User = require("../models/User");
 const { generateAIReviews } = require("../services/reviewService");
 
 const generateReviews = async (req, res) => {

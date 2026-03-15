@@ -1,21 +1,33 @@
-import { useEffect } from "react";
-import { 
-  StarIcon, 
-  ChatBubbleLeftRightIcon, 
-  QrCodeIcon, 
-  ChartBarIcon, 
-  FunnelIcon, 
+import { useEffect, useState } from "react";
+import {
+  StarIcon,
+  ChatBubbleLeftRightIcon,
+  QrCodeIcon,
+  ChartBarIcon,
+  FunnelIcon,
   ShieldCheckIcon,
   ArrowPathIcon,
   UserGroupIcon,
-  ComputerDesktopIcon
+  ComputerDesktopIcon,
+  EnvelopeIcon
 } from "@heroicons/react/24/outline";
 
 export default function RevicaAILandingPage() {
-  // Smooth scroll for anchor links
+  // Simple fade-up trigger on scroll (optional – adds a bit of life)
   useEffect(() => {
-    document.documentElement.classList.add("scroll-smooth");
-    return () => document.documentElement.classList.remove("scroll-smooth");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("fade-up-visible");
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    document.querySelectorAll(".fade-up").forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -41,6 +53,7 @@ export default function RevicaAILandingPage() {
           <a href="#features" className="text-slate-300 hover:text-teal-400 transition">Features</a>
           <a href="#pricing" className="text-slate-300 hover:text-teal-400 transition">Pricing</a>
           <a href="#testimonials" className="text-slate-300 hover:text-teal-400 transition">Testimonials</a>
+          <a href="/overview" className="text-slate-300 hover:text-teal-400 transition">Overview</a>
         </div>
         <div className="flex items-center gap-3">
           <a href="/login" className="px-5 py-2 text-sm font-medium text-white border border-white/10 rounded-xl hover:bg-white/5 transition">Login</a>
@@ -48,7 +61,7 @@ export default function RevicaAILandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section (unchanged) */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-32 md:pt-28 md:pb-40 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -59,7 +72,7 @@ export default function RevicaAILandingPage() {
               </span>
             </h1>
             <p className="mt-6 text-lg text-slate-400 max-w-xl">
-              AI‑powered Google Review management that generates smart replies, 
+              AI‑powered Google Review management that generates smart replies,
               boosts your rating, and turns feedback into revenue.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
@@ -78,7 +91,7 @@ export default function RevicaAILandingPage() {
             </div>
           </div>
 
-          {/* Dashboard Preview (mock) */}
+          {/* Dashboard Preview (mock) - unchanged */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-emerald-500/20 rounded-3xl blur-2xl" />
             <div className="relative bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
@@ -109,7 +122,7 @@ export default function RevicaAILandingPage() {
         </div>
       </section>
 
-      {/* Trusted by Businesses */}
+      {/* Trusted by Businesses (unchanged) */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 py-20 border-y border-white/5">
         <p className="text-center text-slate-400 text-sm uppercase tracking-wider mb-8">Trusted by 5,000+ growing businesses</p>
         <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16 opacity-70">
@@ -119,7 +132,7 @@ export default function RevicaAILandingPage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Features (unchanged) */}
       <section id="features" className="relative z-10 max-w-7xl mx-auto px-6 py-14">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold">Everything you need to manage reviews</h2>
@@ -144,7 +157,7 @@ export default function RevicaAILandingPage() {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* How It Works (unchanged) */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 py-14">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold">Three steps to a 5 star reputation</h2>
@@ -166,7 +179,7 @@ export default function RevicaAILandingPage() {
         </div>
       </section>
 
-      {/* Product Dashboard Preview */}
+      {/* Product Dashboard Preview (unchanged) */}
       <section className="relative z-10 max-w-7xl mx-auto px-6 py-14">
         <div className="relative bg-white/[0.02] backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-500 to-emerald-500" />
@@ -236,28 +249,29 @@ export default function RevicaAILandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* PRICING – Updated to two plans: Free and Pro ($99) */}
       <section id="pricing" className="relative z-10 max-w-7xl mx-auto px-6 py-14">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold">Simple, transparent pricing</h2>
-          <p className="mt-4 text-slate-400">No hidden fees. Scale as you grow.</p>
+          <p className="mt-4 text-slate-400">Start free, upgrade as you grow.</p>
         </div>
-        <div className="mt-16 grid md:grid-cols-3 gap-8">
+        <div className="mt-16 grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {plans.map((plan, idx) => (
             <div
               key={idx}
               className="relative bg-white/[0.02] backdrop-blur-sm border border-white/10 rounded-3xl p-8 hover:border-teal-500/50 transition group"
             >
-              {plan.popular && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-teal-500 text-black text-xs font-bold px-3 py-1 rounded-full">
-                  MOST POPULAR
-                </span>
-              )}
               <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
               <p className="text-slate-400 text-sm mb-4">{plan.description}</p>
               <div className="mb-6">
-                <span className="text-3xl font-bold">${plan.price}</span>
-                <span className="text-slate-400">/month</span>
+                {plan.price === 0 ? (
+                  <span className="text-3xl font-bold">Free</span>
+                ) : (
+                  <>
+                    <span className="text-3xl font-bold">${plan.price}</span>
+                    <span className="text-slate-400">/month</span>
+                  </>
+                )}
               </div>
               <ul className="space-y-3 text-sm mb-8">
                 {plan.features.map((feature, i) => (
@@ -268,20 +282,19 @@ export default function RevicaAILandingPage() {
               </ul>
               <a
                 href="/register"
-                className={`block text-center w-full py-3 rounded-xl font-semibold transition ${
-                  plan.popular
+                className={`block text-center w-full py-3 rounded-xl font-semibold transition ${plan.popular
                     ? "bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-lg shadow-teal-500/20"
                     : "border border-white/10 hover:bg-white/5"
-                }`}
+                  }`}
               >
-                Get Started
+                {plan.price === 0 ? "Start Free" : "Start Pro Trial"}
               </a>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* TESTIMONIALS – with animations (fade-up + hover effects) */}
       <section id="testimonials" className="relative z-10 max-w-7xl mx-auto px-6 py-10">
         <div className="text-center">
           <h2 className="text-3xl md:text-4xl font-bold">Loved by business owners</h2>
@@ -289,7 +302,10 @@ export default function RevicaAILandingPage() {
         </div>
         <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((t, idx) => (
-            <div key={idx} className="bg-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+            <div
+              key={idx}
+              className="fade-up group bg-white/[0.02] backdrop-blur-sm border border-white/10 rounded-2xl p-6 transition-all duration-500 hover:scale-105 hover:border-teal-500/50 hover:shadow-xl hover:shadow-teal-500/10"
+            >
               <div className="flex text-teal-400 mb-4">
                 {[...Array(5)].map((_, i) => (
                   <StarIcon key={i} className="w-5 h-5 fill-current" />
@@ -310,7 +326,7 @@ export default function RevicaAILandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA (unchanged) */}
       <section className="relative z-10 max-w-5xl mx-auto px-6 py-28">
         <div className="relative bg-gradient-to-r from-teal-500/10 to-emerald-500/10 backdrop-blur-xl border border-white/10 rounded-3xl p-16 text-center overflow-hidden">
           <div className="absolute inset-0 bg-grid-white/5 [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent)]" />
@@ -327,10 +343,11 @@ export default function RevicaAILandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* FOOTER – now includes email and clear branding */}
       <footer className="relative z-10 border-t border-white/5 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-4 gap-10">
-          <div>
+        <div className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 md:grid-cols-5 gap-10">
+          {/* Brand column */}
+          <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-2xl font-bold italic bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
                 Revica AI
@@ -339,6 +356,8 @@ export default function RevicaAILandingPage() {
             <p className="text-slate-500 text-sm">Powered by <span className="text-teal-400 font-semibold">ATHENURA</span></p>
             <p className="text-slate-600 text-xs mt-4">© 2026 Revica AI. All rights reserved.</p>
           </div>
+
+          {/* Product links */}
           <div>
             <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2 text-sm text-slate-400">
@@ -348,28 +367,49 @@ export default function RevicaAILandingPage() {
               <li><a href="/register" className="hover:text-teal-400 transition">Sign up</a></li>
             </ul>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-teal-400 transition">About</a></li>
-              <li><a href="#" className="hover:text-teal-400 transition">Blog</a></li>
-              <li><a href="#" className="hover:text-teal-400 transition">Careers</a></li>
-            </ul>
-          </div>
+
+          {/* Legal */}
           <div>
             <h4 className="font-semibold mb-4">Legal</h4>
             <ul className="space-y-2 text-sm text-slate-400">
-              <li><a href="#" className="hover:text-teal-400 transition">Privacy</a></li>
-              <li><a href="#" className="hover:text-teal-400 transition">Terms</a></li>
+              <li><a href="/privacy" className="hover:text-teal-400 transition">Privacy</a></li>
+              <li><a href="/terms" className="hover:text-teal-400 transition">Terms</a></li>
             </ul>
+          </div>
+
+          {/* Contact / Email */}
+          <div>
+            <h4 className="font-semibold mb-4">Contact</h4>
+            <a
+              href="mailto:support@revica.ai"
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-teal-400 transition group"
+            >
+              <EnvelopeIcon className="w-4 h-4 text-teal-400/70 group-hover:text-teal-400" />
+              support@revica.ai
+            </a>
+            <p className="text-xs text-slate-600 mt-4">We reply within 24h</p>
           </div>
         </div>
       </footer>
+
+      {/* Inline CSS for fade-up animation */}
+      <style>{`
+        .fade-up {
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-up-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      `}</style>
     </div>
   );
 }
 
 // Data arrays
+
 const features = [
   {
     icon: <ChatBubbleLeftRightIcon className="w-6 h-6" />,
@@ -418,25 +458,33 @@ const steps = [
   }
 ];
 
+// Updated pricing – two plans
 const plans = [
   {
-    name: "Starter",
-    description: "For small businesses just getting started.",
-    price: 29,
-    features: ["Up to 100 reviews/month", "AI reply generation", "Basic analytics"]
+    name: "Free",
+    description: "Perfect for getting started with AI Google reviews.",
+    price: 0,
+    features: [
+      "10 AI review generations per month",
+      "AI reply generation",
+      "Basic analytics",
+      "1 business location",
+      "QR review poster"
+    ]
   },
   {
-    name: "Growth",
-    description: "For growing teams with higher volume.",
-    price: 79,
+    name: "Pro",
+    description: "Best for businesses managing multiple locations.",
+    price: 99,
     popular: true,
-    features: ["Up to 500 reviews/month", "Advanced sentiment analysis", "Competitor tracking", "Team access"]
-  },
-  {
-    name: "Business",
-    description: "For multi‑location businesses.",
-    price: 199,
-    features: ["Unlimited reviews", "API access", "Dedicated account manager", "Custom reporting"]
+    features: [
+      "100 AI review generations per day",
+      "Up to 5 businesses",
+      "Store up to 100 reviews",
+      "Advanced analytics",
+      "Priority support",
+      "Multiple QR posters (Comming Soon)"
+    ]
   }
 ];
 
